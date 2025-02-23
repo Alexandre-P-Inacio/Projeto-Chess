@@ -156,3 +156,15 @@ h1 {
 #play-bot-btn:hover {
   background-color: #f39c12;
 }
+
+.card {
+  margin: 20px;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+}
+
+#board {
+  margin: 20px auto;
+}

@@ -206,7 +206,88 @@ document.getElementById('play-link').addEventListener('click', () => {
   location.reload();  // Recarrega a página, retornando ao estado inicial
 });
 
+// Inicializa o tabuleiro de xadrez
+const board = ChessBoard('board', {
+  draggable: true,
+  dropOffBoard: 'trash',
+  sparePieces: true,
+  onDragStart: onDragStart,
+  onDrop: onDrop,
+  onSnapEnd: onSnapEnd,
+  pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png'
+});
+
+const game = new Chess();
+
+// Inicializa o jogo
+function startGame() {
+  game.reset();
+  board.start();
+  updateStatus();
+}
+
+// Limpa o tabuleiro
+function clearGame() {
+  game.clear();
+  board.clear();
+  document.getElementById('status').innerText = "Jogo limpo.";
+  document.getElementById('fen').innerText = "";
+}
+
+// Função chamada ao iniciar o movimento
+function onDragStart(source, piece, position, orientation) {
+  if (game.game_over()) return false;
+
+  if ((game.turn() === 'w' && piece.search(/^b/) !== -1) ||
+      (game.turn() === 'b' && piece.search(/^w/) !== -1)) {
+      return false;
+  }
+}
+
+// Função chamada ao soltar a peça
+function onDrop(source, target) {
+  const move = game.move({
+      from: source,
+      to: target,
+      promotion: 'q' // Sempre promove a peça para rainha
+  });
+
+  if (move === null) return 'snapback';
+
+  updateStatus();
+}
+
+// Função chamada após cada movimento
+function onSnapEnd() {
+  board.position(game.fen());
+}
+
+// Atualiza o status do jogo
+function updateStatus() {
+  let status = '';
+
+  const moveColor = game.turn() === 'w' ? 'Branco' : 'Preto';
+
+  if (game.in_checkmate()) {
+      status = `Fim de jogo! ${moveColor} está em xeque-mate.`;
+  } else if (game.in_draw()) {
+      status = 'Fim de jogo! Empate.';
+  } else if (game.in_check()) {
+      status = `O Rei de ${moveColor} está em xeque.`;
+  } else {
+      status = `${moveColor} é a vez de jogar.`;
+  }
+
+  document.getElementById('status').innerText = status;
+  document.getElementById('fen').innerText = game.fen();
+}
+
+// Adiciona eventos aos botões
+document.getElementById('startBtn').addEventListener('click', startGame);
+document.getElementById('clearBtn').addEventListener('click', clearGame);
+
 // Evento para o botão de "Jogar com Bot"
 document.getElementById('play-bot-btn').addEventListener('click', () => {
-  location.reload();  // Recarrega a página, voltando ao estado inicial
+  document.getElementById('welcome-page').style.display = 'none';  // Esconde a página de boas-vindas
+  document.getElementById('chess-game').style.display = 'block';  // Exibe o tabuleiro de xadrez
 });

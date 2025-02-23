@@ -1,49 +1,57 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Chess Profile</title>
-  <link rel="stylesheet" href="styles.css">
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chess Profile</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
 </head>
 <body>
-  <!-- Hotbar (Barra superior) -->
-  <div class="hotbar">
-    <div id="play-link" class="hotbar-item">PLAY</div> <!-- Botão para voltar à página inicial -->
-    <div class="search-bar">
-      <input type="text" id="username" placeholder="Chess.com Username" />
-      <button id="fetch-profile">Search Profile</button>
+    <div class="hotbar">
+        <div id="play-link" class="hotbar-item">PLAY</div>
+        <div class="search-bar">
+            <input type="text" id="username" placeholder="Chess.com Username" />
+            <button id="fetch-profile">Search Profile</button>
+        </div>
     </div>
-  </div>
-  
-  <!-- Página Inicial com botão "Jogar com Bot" -->
-  <div class="container" id="welcome-page">
-    <button id="play-bot-btn" class="card">Play with Bot</button>
-  </div>
 
-  <!-- Resultados do perfil -->
-  <div id="profile" class="card" style="display: none;">
-    <h2>Profile</h2>
-    <div id="profile-info"></div>
-  </div>
-  
-  <div id="games" class="card" style="display: none;">
-    <h2>Recent Games</h2>
-    <div id="games-list"></div>
-  </div>
+    <div class="container" id="welcome-page">
+        <button id="play-bot-btn" class="card">Play with Bot</button>
+    </div>
 
-  <div id="stats" class="card" style="display: none;">
-    <h2>Statistics</h2>
-    <div id="stats-info"></div>
-  </div>
+    <div id="profile" class="card" style="display: none;">
+        <h2>Profile</h2>
+        <div id="profile-info"></div>
+    </div>
 
-  <!-- Mensagem de erro -->
-  <div id="error-message" class="card" style="display: none;">
-    <p>Player not found!</p>
-  </div>
+    <div id="games" class="card" style="display: none;">
+        <h2>Recent Games</h2>
+        <div id="games-list"></div>
+    </div>
 
-  <script src="script.js"></script>
+    <div id="stats" class="card" style="display: none;">
+        <h2>Statistics</h2>
+        <div id="stats-info"></div>
+    </div>
+
+    <div id="error-message" class="card" style="display: none;">
+        <p>Player not found!</p>
+    </div>
+
+    <!-- Jogo contra o Bot -->
+    <div id="chess-game" class="card" style="display: none;">
+        <h2>Jogar contra o Bot</h2>
+        <div id="board" style="width: 400px"></div>
+        <div id="status"></div>
+        <div id="fen"></div>
+        <button id="startBtn">Iniciar Jogo</button>
+        <button id="clearBtn">Limpar Jogo</button>
+    </div>
+
+    <script src="script.js"></script>
 </body>
 </html>
- 
