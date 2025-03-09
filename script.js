@@ -5,24 +5,22 @@ const fetchProfile = (username) => {
     .then(profile => {
       const profileDiv = document.getElementById('profile-info');
       const errorMessageDiv = document.getElementById('error-message');
-      const profileCard = document.getElementById('profile');
-      const gamesCard = document.getElementById('games');
-      const statsCard = document.getElementById('stats');
       const welcomePage = document.getElementById('welcome-page');
-      const playBotBtn = document.getElementById('play-bot-btn');
+      const chessGame = document.getElementById('chess-game');
+      const profileAndGames = document.querySelector('.profile-and-games');
 
-      // Limpa qualquer conteúdo das seções
+      // Esconde todas as seções
       errorMessageDiv.style.display = 'none';
-      profileCard.style.display = 'none';
-      gamesCard.style.display = 'none';
-      statsCard.style.display = 'none';
-      welcomePage.style.display = 'none';  // Esconde a página de boas-vindas
+      welcomePage.style.display = 'none';
+      chessGame.style.display = 'none';
+      profileAndGames.style.display = 'none';
 
-      // Caso o perfil não exista
       if (profile.error || !profile) {
-        errorMessageDiv.style.display = 'block';  // Exibe mensagem de erro
-        playBotBtn.style.display = 'block';  // Exibe o botão "Jogar com Bot"
+        errorMessageDiv.style.display = 'block';
       } else {
+        // Mostra o layout de perfil e jogos
+        profileAndGames.style.display = 'flex';
+
         // Exibe as informações de perfil
         profileDiv.innerHTML = `
           <img src="${profile.avatar}" alt="${profile.username}" style="border-radius: 50%; width: 120px; height: 120px;" />
@@ -30,19 +28,13 @@ const fetchProfile = (username) => {
           <p><strong>Status:</strong> ${profile.status || 'Não disponível'}</p>
         `;
 
-        // Exibe o perfil
-        profileCard.style.display = 'block';
-
-        // Exibe o botão de "Jogar com Bot"
-        playBotBtn.style.display = 'block';
-
         // Chama as funções para buscar jogos e estatísticas
         fetchGames(username);
         fetchStats(username);
       }
     })
     .catch(err => {
-      alert('Erro ao buscar perfil: ' + err);
+      console.error('Erro ao buscar perfil:', err);
     });
 };
 
@@ -60,54 +52,53 @@ const convertTimeControl = (timeControl) => {
   }
 };
 
-// Função para buscar as últimas 3 partidas de um jogador no mês atual
+// Função para buscar as últimas 5 partidas de um jogador no mês atual
 const fetchGames = (username) => {
   const today = new Date();
   const year = today.getFullYear();
-  const month = (today.getMonth() + 1).toString().padStart(2, '0');  // Mês atual
+  const month = (today.getMonth() + 1).toString().padStart(2, '0');
 
-  // URL para buscar os jogos do mês atual
   fetch(`https://api.chess.com/pub/player/${username}/games/${year}/${month}`)
     .then(response => response.json())
     .then(games => {
       const gamesDiv = document.getElementById('games-list');
-      const gamesCard = document.getElementById('games');
-      gamesDiv.innerHTML = ''; // Limpa as partidas anteriores
+      gamesDiv.innerHTML = '';
 
       if (!games.games || games.games.length === 0) {
-        gamesDiv.innerHTML = '<p>No games available for this month.</p>';
-      } else {
-        const lastThreeGames = games.games.slice(0, 3);
+        gamesDiv.innerHTML = '<p>Nenhum jogo encontrado este mês.</p>';
+        return;
+      }
 
-        lastThreeGames.forEach(game => {
+      // Pega os últimos 5 jogos
+      const lastFiveGames = games.games.slice(-5);
+
+      lastFiveGames.forEach(game => {
           const gameDiv = document.createElement('div');
           gameDiv.classList.add('game-card');
-          const result = game.result ? game.result : 'Pending';
+
+        const result = game.white.username === username ? 
+          (game.white.result === 'win' ? 'Vitória' : game.white.result === 'lost' ? 'Derrota' : 'Empate') :
+          (game.black.result === 'win' ? 'Vitória' : game.black.result === 'lost' ? 'Derrota' : 'Empate');
+
+        const resultColor = result === 'Vitória' ? '#4CAF50' : 
+                          result === 'Derrota' ? '#f44336' : '#ff9800';
 
           gameDiv.innerHTML = `
-            <div class="game-header">
-              <p><strong>Result:</strong> ${result}</p>
-              <p><strong>Time Control:</strong> ${convertTimeControl(game.time_control)}</p>
-            </div>
+          <div class="game-result" style="color: ${resultColor}">${result}</div>
             <div class="game-details">
-              <p><strong>Players:</strong> ${game.white.username} (White) vs ${game.black.username} (Black)</p>
-              <p><a href="${game.url}" target="_blank">View full game</a></p>
+            <p>Brancas: ${game.white.username}</p>
+            <p>Pretas: ${game.black.username}</p>
+            <p>Controle de tempo: ${convertTimeControl(game.time_control)}</p>
+            <a href="${game.url}" target="_blank">Ver partida</a>
             </div>
           `;
           gamesDiv.appendChild(gameDiv);
         });
-      }
-
-      if (gamesDiv.innerHTML !== '') {
-        gamesCard.style.display = 'block';
-      }
     })
     .catch(err => {
-      alert('Error fetching games: ' + err);
+      console.error('Erro ao buscar jogos:', err);
     });
 };
-
-
 
 // Função para buscar as estatísticas de um jogador
 const fetchStats = (username) => {
@@ -188,7 +179,6 @@ const fetchStats = (username) => {
     });
 };
 
-
 // Evento do botão de busca
 document.getElementById('fetch-profile').addEventListener('click', () => {
   const username = document.getElementById('username').value;
@@ -206,11 +196,10 @@ document.getElementById('play-link').addEventListener('click', () => {
   location.reload();  // Recarrega a página, retornando ao estado inicial
 });
 
-// Inicializa o tabuleiro de xadrez
+// Modifique a inicialização do tabuleiro
 const board = ChessBoard('board', {
   draggable: true,
-  dropOffBoard: 'trash',
-  sparePieces: true,
+    position: 'start',
   onDragStart: onDragStart,
   onDrop: onDrop,
   onSnapEnd: onSnapEnd,
@@ -218,76 +207,357 @@ const board = ChessBoard('board', {
 });
 
 const game = new Chess();
+let playerColor = '';
+let isPlayingWithComputer = false;
 
-// Inicializa o jogo
-function startGame() {
+// Configurações de dificuldade
+const difficultySettings = {
+    '5': { // Fácil
+        depth: 5,
+        skipMoves: 0.4  // 40% de chance de não usar o melhor movimento
+    },
+    '10': { // Médio
+        depth: 10,
+        skipMoves: 0.2  // 20% de chance de não usar o melhor movimento
+    },
+    '15': { // Difícil
+        depth: 15,
+        skipMoves: 0.05 // 5% de chance de não usar o melhor movimento
+    }
+};
+
+async function getStockfishMove(fen) {
+    try {
+        // Pega a dificuldade selecionada
+        const difficulty = document.getElementById('difficulty').value;
+        const settings = difficultySettings[difficulty];
+        
+        const url = `https://stockfish.online/api/s/v2.php?fen=${encodeURIComponent(fen)}&depth=${settings.depth}`;
+        document.getElementById('sent-fen').innerText = `FEN enviado: ${fen}`;
+        
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        const formattedResponse = `Resposta da API:
+Sucesso: ${data.success}
+Avaliação: ${data.evaluation || 'N/A'}
+Mate em: ${data.mate || 'N/A'}
+Melhor jogada: ${data.bestmove || 'N/A'}
+Continuação: ${data.continuation || 'N/A'}
+Dificuldade: ${difficulty} (depth ${settings.depth})`;
+
+        document.getElementById('api-response').innerText = formattedResponse;
+        
+        if (data.success && data.bestmove) {
+            // Chance de escolher um movimento aleatório em vez do melhor movimento
+            if (Math.random() < settings.skipMoves) {
+                // Pega todos os movimentos possíveis
+                const moves = game.moves({ verbose: true });
+                if (moves.length > 0) {
+                    // Escolhe um movimento aleatório
+                    const randomMove = moves[Math.floor(Math.random() * moves.length)];
+                    console.log('Movimento aleatório escolhido em vez do melhor movimento');
+                    return randomMove.from + randomMove.to;
+                }
+            }
+            return data.bestmove.split(' ')[1];
+        }
+        return null;
+    } catch (error) {
+        console.error('Erro ao consultar Stockfish:', error);
+        document.getElementById('api-response').innerText = `Erro na API: ${error.message}`;
+        return null;
+    }
+}
+
+async function makeComputerMove() {
+    if (!isPlayingWithComputer || game.game_over()) return;
+    
+    const fen = game.fen();
+    const move = await getStockfishMove(fen);
+    
+    if (move) {
+        game.move({
+            from: move.substring(0, 2),
+            to: move.substring(2, 4),
+            promotion: move.length === 5 ? move.substring(4, 5) : undefined
+        });
+        board.position(game.fen());
+        updateStatus();
+        updateMovesList();
+    }
+}
+
+function startGame(color) {
+    playerColor = color;
+    isPlayingWithComputer = true;
   game.reset();
   board.start();
+    
+    // Esconde os controles de início e mostra os de jogo
+    document.querySelector('.start-controls').style.display = 'none';
+    document.getElementById('resignBtn').style.display = 'block';
+    document.getElementById('newGameBtn').style.display = 'none';
+    
+    // Mostra o histórico e limpa
+    document.querySelector('.moves-history').style.display = 'flex';
+    document.getElementById('moves-list').innerHTML = '';
+    
   updateStatus();
+    
+    if (playerColor === 'b') {
+        makeComputerMove();
+    }
 }
 
-// Limpa o tabuleiro
-function clearGame() {
-  game.clear();
-  board.clear();
-  document.getElementById('status').innerText = "Jogo limpo.";
-  document.getElementById('fen').innerText = "";
+function endGame() {
+    // Esconde o histórico
+    document.querySelector('.moves-history').style.display = 'none';
+    
+    // Mostra os controles de início
+    document.querySelector('.start-controls').style.display = 'flex';
+    document.getElementById('resignBtn').style.display = 'none';
+    document.getElementById('newGameBtn').style.display = 'block';
+    
+    isPlayingWithComputer = false;
+    playerColor = '';
 }
 
-// Função chamada ao iniciar o movimento
 function onDragStart(source, piece, position, orientation) {
-  if (game.game_over()) return false;
+    if (game.game_over() || !isPlayingWithComputer) return false;
 
-  if ((game.turn() === 'w' && piece.search(/^b/) !== -1) ||
+    if ((game.turn() === 'w' && playerColor === 'b') ||
+        (game.turn() === 'b' && playerColor === 'w') ||
+        (game.turn() === 'w' && piece.search(/^b/) !== -1) ||
       (game.turn() === 'b' && piece.search(/^w/) !== -1)) {
       return false;
   }
+    return true;
 }
 
-// Função chamada ao soltar a peça
 function onDrop(source, target) {
+    removeHighlights();
+    
   const move = game.move({
       from: source,
       to: target,
-      promotion: 'q' // Sempre promove a peça para rainha
+        promotion: 'q'
   });
 
   if (move === null) return 'snapback';
 
   updateStatus();
+    updateMovesList();
+
+    if (isPlayingWithComputer && game.turn() !== playerColor) {
+        setTimeout(makeComputerMove, 500);
+    }
 }
 
-// Função chamada após cada movimento
 function onSnapEnd() {
   board.position(game.fen());
 }
 
-// Atualiza o status do jogo
 function updateStatus() {
   let status = '';
-
-  const moveColor = game.turn() === 'w' ? 'Branco' : 'Preto';
-
+    if (game.game_over()) {
   if (game.in_checkmate()) {
-      status = `Fim de jogo! ${moveColor} está em xeque-mate.`;
+            status = `Xeque-mate! ${game.turn() === 'w' ? 'Pretas' : 'Brancas'} vencem!`;
   } else if (game.in_draw()) {
-      status = 'Fim de jogo! Empate.';
-  } else if (game.in_check()) {
-      status = `O Rei de ${moveColor} está em xeque.`;
+            status = 'Empate!';
   } else {
-      status = `${moveColor} é a vez de jogar.`;
-  }
-
+            status = 'Fim de jogo!';
+        }
+        
+        // Esconde o histórico no fim do jogo
+        document.querySelector('.moves-history').style.display = 'none';
+        document.querySelector('.start-controls').style.display = 'flex';
+        document.getElementById('resignBtn').style.display = 'none';
+        document.getElementById('newGameBtn').style.display = 'block';
+        
+        isPlayingWithComputer = false;
+    } else {
+        status = `${game.turn() === 'w' ? 'Brancas' : 'Pretas'} jogam`;
+    }
   document.getElementById('status').innerText = status;
-  document.getElementById('fen').innerText = game.fen();
 }
 
-// Adiciona eventos aos botões
-document.getElementById('startBtn').addEventListener('click', startGame);
-document.getElementById('clearBtn').addEventListener('click', clearGame);
+// Event Listeners
+window.addEventListener('load', () => {
+    // Adiciona div para informações da API se não existir
+    if (!document.getElementById('api-info')) {
+        const apiInfoDiv = `
+            <div id="api-info" class="api-info">
+                <div id="sent-fen">FEN enviado: </div>
+                <div id="api-response">Resposta da API: </div>
+            </div>
+        `;
+        document.getElementById('status').insertAdjacentHTML('afterend', apiInfoDiv);
+    }
 
-// Evento para o botão de "Jogar com Bot"
+    // Botão de jogar contra bot
 document.getElementById('play-bot-btn').addEventListener('click', () => {
-  document.getElementById('welcome-page').style.display = 'none';  // Esconde a página de boas-vindas
-  document.getElementById('chess-game').style.display = 'block';  // Exibe o tabuleiro de xadrez
+        document.getElementById('welcome-page').style.display = 'none';
+        document.getElementById('chess-game').style.display = 'block';
+    });
+
+    // Botões de escolha de cor
+    document.getElementById('playAsWhite').addEventListener('click', () => startGame('w'));
+    document.getElementById('playAsBlack').addEventListener('click', () => startGame('b'));
+
+    // Botão de desistir
+    document.getElementById('resignBtn').addEventListener('click', () => {
+        if (confirm('Tem certeza que deseja desistir?')) {
+            document.getElementById('status').innerText = 
+                `Jogo encerrado. ${playerColor === 'w' ? 'Pretas' : 'Brancas'} vencem por desistência!`;
+            
+            // Esconde o histórico
+            document.querySelector('.moves-history').style.display = 'none';
+            
+            // Mostra os controles de novo jogo
+            document.querySelector('.start-controls').style.display = 'flex';
+            document.getElementById('resignBtn').style.display = 'none';
+            document.getElementById('newGameBtn').style.display = 'block';
+            
+            isPlayingWithComputer = false;
+            playerColor = '';
+        }
+    });
+
+    // Seletor de dificuldade
+    document.getElementById('difficulty').addEventListener('change', (e) => {
+        const difficulty = e.target.value;
+        const settings = difficultySettings[difficulty];
+        console.log(`Dificuldade alterada para: ${difficulty} (depth ${settings.depth})`);
+    });
+
+    // Botão de ajuda
+    document.getElementById('helpBtn').addEventListener('click', showBestMove);
+
+    // Event listener para o botão de novo jogo
+    document.getElementById('newGameBtn').addEventListener('click', () => {
+        game.reset();
+        board.start();
+        
+        // Esconde o histórico
+        document.querySelector('.moves-history').style.display = 'none';
+        
+        // Mostra os controles iniciais
+        document.querySelector('.start-controls').style.display = 'flex';
+        document.getElementById('resignBtn').style.display = 'none';
+        document.getElementById('newGameBtn').style.display = 'none';
+        
+        document.getElementById('moves-list').innerHTML = '';
+        document.getElementById('status').innerText = 'Selecione uma cor para começar';
+        
+        isPlayingWithComputer = false;
+        playerColor = '';
+    });
 });
+
+// Estilos para a informação da API
+const styles = `
+    .api-info {
+        margin-top: 20px;
+        padding: 15px;
+        background-color: #f5f5f5;
+        border-radius: 4px;
+        font-family: monospace;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+    }
+
+    .api-info div {
+        margin: 8px 0;
+        line-height: 1.4;
+    }
+`;
+
+const styleSheet = document.createElement("style");
+styleSheet.innerText = styles;
+document.head.appendChild(styleSheet);
+
+// Adicione estilos para o seletor de dificuldade
+const additionalStyles = `
+    #difficulty {
+        padding: 8px;
+        font-size: 14px;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+        margin-right: 10px;
+    }
+
+    #difficulty option {
+        padding: 4px;
+    }
+`;
+
+// Adicione os novos estilos
+document.head.appendChild(
+    Object.assign(document.createElement('style'), {
+        textContent: additionalStyles
+    })
+);
+
+// Função para mostrar a melhor jogada
+async function showBestMove() {
+    if (!isPlayingWithComputer || game.game_over()) return;
+    
+    const fen = game.fen();
+    try {
+        const response = await fetch(`https://stockfish.online/api/s/v2.php?fen=${encodeURIComponent(fen)}&depth=15`);
+        const data = await response.json();
+        
+        if (data.success && data.bestmove) {
+            const bestMove = data.bestmove.split(' ')[1];
+            const from = bestMove.substring(0, 2);
+            const to = bestMove.substring(2, 4);
+            
+            // Remove destaques anteriores
+            removeHighlights();
+            
+            // Destaca a casa de origem e destino
+            $(`#board .square-${from}`).addClass('highlight-square');
+            $(`#board .square-${to}`).addClass('highlight-square');
+            
+            // Remove os destaques após 2 segundos
+            setTimeout(removeHighlights, 2000);
+            
+            // Mostra a dica no status
+            document.getElementById('status').innerText = 
+                `Dica: Mova a peça de ${from} para ${to}`;
+        }
+    } catch (error) {
+        console.error('Erro ao buscar melhor jogada:', error);
+    }
+}
+
+// Função para remover destaques
+function removeHighlights() {
+    $('.highlight-square').removeClass('highlight-square');
+}
+
+// Função para atualizar o histórico de jogadas
+function updateMovesList() {
+    const movesList = document.getElementById('moves-list');
+    const history = game.history({ verbose: true });
+    movesList.innerHTML = '';
+    
+    for (let i = 0; i < history.length; i += 2) {
+        const moveNumber = Math.floor(i/2) + 1;
+        const moveDiv = document.createElement('div');
+        moveDiv.className = 'move-item';
+        
+        const whiteMove = history[i];
+        const blackMove = history[i + 1];
+        
+        moveDiv.innerHTML = `
+            <span class="move-number">${moveNumber}.</span>
+            <span class="move-white">${whiteMove.san}</span>
+            ${blackMove ? `<span class="move-black">${blackMove.san}</span>` : ''}
+        `;
+        
+        movesList.appendChild(moveDiv);
+        moveDiv.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    }
+}
