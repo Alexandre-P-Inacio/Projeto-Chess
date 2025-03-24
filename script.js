@@ -536,7 +536,17 @@ window.addEventListener('load', () => {
       endGame();
     }
   });
-
+  window.addEventListener('resize', () => {
+    if (window.board) {
+      window.board.resize();
+    }
+  });
+  window.board = Chessboard('board', {
+    position: 'start',
+    responsive: true,
+    pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png'
+  });
+    
   // Ao clicar em "Novo Jogo", reinicia tudo
   document.getElementById('newGameBtn').addEventListener('click', () => {
     game.reset();
