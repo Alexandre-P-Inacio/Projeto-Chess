@@ -24,9 +24,15 @@ function fetchProfile(username) {
       } else {
         profileAndGames.style.display = 'flex';
         profileDiv.innerHTML = `
-          <img src="${profile.avatar}" alt="${profile.username}" />
+          <img src="${profile.avatar}" alt="${profile.username}" style="border-radius: 50%; width: 120px; height: 120px;" />
           <p><strong>Nome:</strong> ${profile.name || 'N/D'}</p>
           <p><strong>Status:</strong> ${profile.status || 'N/D'}</p>
+          <p><strong>Username:</strong> ${profile.username}</p>
+          <p><strong>URL do Perfil:</strong> <a href="${profile.url}" target="_blank">${profile.url}</a></p>
+          <p><strong>Tipo de Conta:</strong> ${profile.type || 'N/D'}</p>
+          <p><strong>Data de Criação:</strong> ${new Date(profile.created * 1000).toLocaleDateString() || 'N/D'}</p>
+          <p><strong>Último Jogo:</strong> ${new Date(profile.last_game * 1000).toLocaleDateString() || 'N/D'}</p>
+          <p><strong>Última Atividade:</strong> ${new Date(profile.last_activity * 1000).toLocaleDateString() || 'N/D'}</p>
         `;
         fetchGames(username);
         fetchStats(username);
@@ -107,24 +113,65 @@ function fetchStats(username) {
       const statsDiv = document.getElementById('stats-info');
       statsDiv.innerHTML = '';
 
+      // Estatísticas Blitz
       if (data.chess_blitz) {
         statsDiv.innerHTML += `
-          <p><strong>Blitz Best:</strong> ${data.chess_blitz.best.rating}</p>
-          <p><strong>Blitz Last:</strong> ${data.chess_blitz.last.rating}</p>
+          <p><strong>Melhor rating Blitz:</strong> ${data.chess_blitz.best.rating}</p>
+          <p><strong>Último rating Blitz:</strong> ${data.chess_blitz.last.rating}</p>
+          <p><strong>Vitórias Blitz:</strong> ${data.chess_blitz.record.win}</p>
+          <p><strong>Derrotas Blitz:</strong> ${data.chess_blitz.record.loss}</p>
+          <p><strong>Empates Blitz:</strong> ${data.chess_blitz.record.draw}</p>
         `;
       }
+
+      // Estatísticas Bullet
       if (data.chess_bullet) {
         statsDiv.innerHTML += `
-          <p><strong>Bullet Best:</strong> ${data.chess_bullet.best.rating}</p>
-          <p><strong>Bullet Last:</strong> ${data.chess_bullet.last.rating}</p>
+          <p><strong>Melhor rating Bullet:</strong> ${data.chess_bullet.best.rating}</p>
+          <p><strong>Último rating Bullet:</strong> ${data.chess_bullet.last.rating}</p>
+          <p><strong>Vitórias Bullet:</strong> ${data.chess_bullet.record.win}</p>
+          <p><strong>Derrotas Bullet:</strong> ${data.chess_bullet.record.loss}</p>
+          <p><strong>Empates Bullet:</strong> ${data.chess_bullet.record.draw}</p>
         `;
       }
+
+      // Estatísticas Daily
       if (data.chess_daily) {
         statsDiv.innerHTML += `
-          <p><strong>Daily Best:</strong> ${data.chess_daily.best.rating}</p>
-          <p><strong>Daily Last:</strong> ${data.chess_daily.last.rating}</p>
+          <p><strong>Melhor rating Daily:</strong> ${data.chess_daily.best.rating}</p>
+          <p><strong>Último rating Daily:</strong> ${data.chess_daily.last.rating}</p>
+          <p><strong>Vitórias Daily:</strong> ${data.chess_daily.record.win}</p>
+          <p><strong>Derrotas Daily:</strong> ${data.chess_daily.record.loss}</p>
+          <p><strong>Empates Daily:</strong> ${data.chess_daily.record.draw}</p>
         `;
       }
+
+      // Estatísticas de Tactics
+      if (data.tactics) {
+        statsDiv.innerHTML += `
+          <p><strong>Melhor rating Tactics:</strong> ${data.tactics.highest.rating}</p>
+          <p><strong>Último rating Tactics:</strong> ${data.tactics.lowest.rating}</p>
+          <p><strong>Jogos em Tactics:</strong> ${data.tactics.total}</p>
+        `;
+      }
+
+      // Estatísticas de Puzzle Rush
+      if (data.puzzle_rush) {
+        statsDiv.innerHTML += `
+          <p><strong>Melhor score Puzzle Rush:</strong> ${data.puzzle_rush.best.score}</p>
+          <p><strong>Total de tentativas Puzzle Rush:</strong> ${data.puzzle_rush.total_attempts}</p>
+        `;
+      }
+
+      // Estatísticas de Lessons
+      if (data.lessons) {
+        statsDiv.innerHTML += `
+          <p><strong>Melhor rating Lessons:</strong> ${data.lessons.highest.rating}</p>
+          <p><strong>Último rating Lessons:</strong> ${data.lessons.lowest.rating}</p>
+        `;
+      }
+
+      // Exibe as estatísticas se houver
       if (statsDiv.innerHTML) {
         statsCard.style.display = 'block';
       }
@@ -470,9 +517,6 @@ window.addEventListener('load', () => {
     location.reload();
   });
 
-  document.getElementById('tutorial-link').addEventListener('click', () => {
-    alert('Aqui poderias redirecionar para um tutorial...');
-  });
 
   document.getElementById('play-bot-btn').addEventListener('click', () => {
     document.getElementById('welcome-page').style.display = 'none';

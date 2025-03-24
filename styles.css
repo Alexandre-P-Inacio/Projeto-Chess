@@ -32,10 +32,20 @@ body {
   box-shadow: 0 6px 12px rgba(0,0,0,0.1);
 }
 .hotbar-item {
-  cursor: pointer;
-  font-weight: bold;
-  transition: color 0.3s;
+  text-decoration: none;
+  color: white;
 }
+
+/* Para manter a navegação suave e coerente em todos os estados (hover, visitado, etc.) */
+.hotbar-item:hover,
+.hotbar-item:visited,
+.hotbar-item:active,
+.hotbar-item:link {
+  text-decoration: none;
+  color: white;
+}
+
+
 .hotbar-item:hover {
   color: #ddd;
 }
