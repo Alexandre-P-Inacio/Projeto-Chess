@@ -322,18 +322,50 @@ function endGame() {
     isPlayingWithComputer = false;
     playerColor = '';
 }
+function startPvPGame() {
+  isPlayingWithComputer = false;
+  playerColor = ''; // sem cor fixa, turnos alternados
+  game.reset();
+  board.start();
+
+  // Esconde a tela de boas-vindas e mostra o tabuleiro
+  document.getElementById('welcome-page').style.display = 'none';
+  document.getElementById('chess-game').style.display = 'block';
+
+  // Oculta controles do bot
+  document.querySelector('.start-controls').style.display = 'none';
+  document.getElementById('resignBtn').style.display = 'none';
+  document.getElementById('newGameBtn').style.display = 'block';
+
+  // Mostra o histórico
+  document.querySelector('.moves-history').style.display = 'flex';
+  document.getElementById('moves-list').innerHTML = '';
+
+  updateStatus();
+}
 
 function onDragStart(source, piece, position, orientation) {
-    if (game.game_over() || !isPlayingWithComputer) return false;
+  if (game.game_over()) return false;
 
-    if ((game.turn() === 'w' && playerColor === 'b') ||
-        (game.turn() === 'b' && playerColor === 'w') ||
-        (game.turn() === 'w' && piece.search(/^b/) !== -1) ||
-      (game.turn() === 'b' && piece.search(/^w/) !== -1)) {
-      return false;
+  // Bloqueia peças se for contra o bot e não for a vez do jogador
+  if (isPlayingWithComputer) {
+      if ((game.turn() === 'w' && playerColor === 'b') ||
+          (game.turn() === 'b' && playerColor === 'w') ||
+          (game.turn() === 'w' && piece.search(/^b/) !== -1) ||
+          (game.turn() === 'b' && piece.search(/^w/) !== -1)) {
+          return false;
+      }
+  } else {
+      // PvP local: qualquer peça pode ser movida no seu turno
+      if ((game.turn() === 'w' && piece.search(/^b/) !== -1) ||
+          (game.turn() === 'b' && piece.search(/^w/) !== -1)) {
+          return false;
+      }
   }
-    return true;
+
+  return true;
 }
+
 
 function onDrop(source, target) {
     removeHighlights();
@@ -382,78 +414,75 @@ function updateStatus() {
   document.getElementById('status').innerText = status;
 }
 
-// Event Listeners
 window.addEventListener('load', () => {
-    // Adiciona div para informações da API se não existir
-    if (!document.getElementById('api-info')) {
-        const apiInfoDiv = `
-            <div id="api-info" class="api-info">
-                <div id="sent-fen">FEN enviado: </div>
-                <div id="api-response">Resposta da API: </div>
-            </div>
-        `;
-        document.getElementById('status').insertAdjacentHTML('afterend', apiInfoDiv);
-    }
+  // Adiciona div para informações da API se não existir
+  if (!document.getElementById('api-info')) {
+      const apiInfoDiv = `
+          <div id="api-info" class="api-info">
+              <div id="sent-fen">FEN enviado: </div>
+              <div id="api-response">Resposta da API: </div>
+          </div>
+      `;
+      document.getElementById('status').insertAdjacentHTML('afterend', apiInfoDiv);
+  }
 
-    // Botão de jogar contra bot
-document.getElementById('play-bot-btn').addEventListener('click', () => {
-        document.getElementById('welcome-page').style.display = 'none';
-        document.getElementById('chess-game').style.display = 'block';
-    });
+  // Botão de jogar contra o bot
+  document.getElementById('play-bot-btn').addEventListener('click', () => {
+      document.getElementById('welcome-page').style.display = 'none';
+      document.getElementById('chess-game').style.display = 'block';
+  });
 
-    // Botões de escolha de cor
-    document.getElementById('playAsWhite').addEventListener('click', () => startGame('w'));
-    document.getElementById('playAsBlack').addEventListener('click', () => startGame('b'));
+  // ✅ Botão de jogar Player vs Player
+  document.getElementById('pvp-btn').addEventListener('click', startPvPGame);
 
-    // Botão de desistir
-    document.getElementById('resignBtn').addEventListener('click', () => {
-        if (confirm('Tem certeza que deseja desistir?')) {
-            document.getElementById('status').innerText = 
-                `Jogo encerrado. ${playerColor === 'w' ? 'Pretas' : 'Brancas'} vencem por desistência!`;
-            
-            // Esconde o histórico
-            document.querySelector('.moves-history').style.display = 'none';
-            
-            // Mostra os controles de novo jogo
-            document.querySelector('.start-controls').style.display = 'flex';
-            document.getElementById('resignBtn').style.display = 'none';
-            document.getElementById('newGameBtn').style.display = 'block';
-            
-            isPlayingWithComputer = false;
-            playerColor = '';
-        }
-    });
+  // Botões de escolha de cor
+  document.getElementById('playAsWhite').addEventListener('click', () => startGame('w'));
+  document.getElementById('playAsBlack').addEventListener('click', () => startGame('b'));
 
-    // Seletor de dificuldade
-    document.getElementById('difficulty').addEventListener('change', (e) => {
-        const difficulty = e.target.value;
-        const settings = difficultySettings[difficulty];
-        console.log(`Dificuldade alterada para: ${difficulty} (depth ${settings.depth})`);
-    });
+  // Botão de desistir
+  document.getElementById('resignBtn').addEventListener('click', () => {
+      if (confirm('Tem certeza que deseja desistir?')) {
+          document.getElementById('status').innerText = 
+              `Jogo encerrado. ${playerColor === 'w' ? 'Pretas' : 'Brancas'} vencem por desistência!`;
+          
+          document.querySelector('.moves-history').style.display = 'none';
+          document.querySelector('.start-controls').style.display = 'flex';
+          document.getElementById('resignBtn').style.display = 'none';
+          document.getElementById('newGameBtn').style.display = 'block';
+          
+          isPlayingWithComputer = false;
+          playerColor = '';
+      }
+  });
 
-    // Botão de ajuda
-    document.getElementById('helpBtn').addEventListener('click', showBestMove);
+  // Seletor de dificuldade
+  document.getElementById('difficulty').addEventListener('change', (e) => {
+      const difficulty = e.target.value;
+      const settings = difficultySettings[difficulty];
+      console.log(`Dificuldade alterada para: ${difficulty} (depth ${settings.depth})`);
+  });
 
-    // Event listener para o botão de novo jogo
-    document.getElementById('newGameBtn').addEventListener('click', () => {
-        game.reset();
-        board.start();
-        
-        // Esconde o histórico
-        document.querySelector('.moves-history').style.display = 'none';
-        
-        // Mostra os controles iniciais
-        document.querySelector('.start-controls').style.display = 'flex';
-        document.getElementById('resignBtn').style.display = 'none';
-        document.getElementById('newGameBtn').style.display = 'none';
-        
-        document.getElementById('moves-list').innerHTML = '';
-        document.getElementById('status').innerText = 'Selecione uma cor para começar';
-        
-        isPlayingWithComputer = false;
-        playerColor = '';
-    });
+  // Botão de ajuda
+  document.getElementById('helpBtn').addEventListener('click', showBestMove);
+
+  // Botão de novo jogo
+  document.getElementById('newGameBtn').addEventListener('click', () => {
+      game.reset();
+      board.start();
+      
+      document.querySelector('.moves-history').style.display = 'none';
+      document.querySelector('.start-controls').style.display = 'flex';
+      document.getElementById('resignBtn').style.display = 'none';
+      document.getElementById('newGameBtn').style.display = 'none';
+      
+      document.getElementById('moves-list').innerHTML = '';
+      document.getElementById('status').innerText = 'Selecione uma cor para começar';
+      
+      isPlayingWithComputer = false;
+      playerColor = '';
+  });
 });
+
 
 // Estilos para a informação da API
 const styles = `
