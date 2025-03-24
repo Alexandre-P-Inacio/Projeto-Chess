@@ -1,97 +1,131 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chess Profile</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.css">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/stockfish.js/10.0.2/stockfish.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chess Profile & Bot</title>
+
+  <!-- Estilos externos -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.css"
+  />
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+  />
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-    <div class="hotbar">
-        <div id="play-link" class="hotbar-item">PLAY</div>
-        <div class="search-bar">
-            <input type="text" id="username" placeholder="Chess.com Username" />
-            <button id="fetch-profile">Search Profile</button>
-        </div>
+  <!-- Barra de navegação -->
+  <div class="hotbar">
+    <div id="play-link" class="hotbar-item">PLAY</div>
+    <div class="hotbar-item" id="tutorial-link">How to Play</div>
+    <div class="search-bar">
+      <input type="text" id="username" placeholder="Chess.com Username" />
+      <button id="fetch-profile">Search Profile</button>
     </div>
+  </div>
 
-    <div class="container" id="welcome-page">
-        <button id="play-bot-btn" class="card">Play with Bot</button>
-        <button id="pvp-btn" class="card">Player vs Player</button>
+  <!-- Tela de boas-vindas -->
+  <div class="container" id="welcome-page">
+    <button id="play-bot-btn" class="card">Jogar contra Bot</button>
+    <button id="pvp-btn" class="card">Player vs Player</button>
+  </div>
+
+  <!-- Layout de Perfil e Partidas -->
+  <div class="profile-and-games" style="display: none;">
+    <div class="left-column">
+      <div id="profile" class="card">
+        <h2>Profile</h2>
+        <div id="profile-info"></div>
+      </div>
+      <div id="games" class="card">
+        <h2>Recent Games</h2>
+        <div id="games-list"></div>
+      </div>
     </div>
-    
-
-    <div class="profile-and-games" style="display: none;">
-        <div class="left-column">
-            <div id="profile" class="card">
-                <h2>Profile</h2>
-                <div id="profile-info"></div>
-            </div>
-
-            <div id="games" class="card">
-                <h2>Recent Games</h2>
-                <div id="games-list"></div>
-            </div>
-        </div>
-
-        <div class="right-column">
-            <div id="stats" class="card">
-                <h2>Statistics</h2>
-                <div id="stats-info"></div>
-            </div>
-        </div>
+    <div class="right-column">
+      <div id="stats" class="card" style="display: none;">
+        <h2>Statistics</h2>
+        <div id="stats-info"></div>
+      </div>
     </div>
+  </div>
 
-    <div id="error-message" class="card" style="display: none;">
-        <p>Player not found!</p>
-    </div>
+  <!-- Mensagem de erro -->
+  <div id="error-message" class="card" style="display: none;">
+    <p>Jogador não encontrado!</p>
+  </div>
 
-    <div class="game-layout">
-        <div id="chess-game" class="card" style="display: none;">
-            <h2>Jogar contra o Bot</h2>
-            <div class="game-controls">
-                <div class="start-controls">
-                    <select id="difficulty">
-                        <option value="5">Fácil</option>
-                        <option value="10" selected>Médio</option>
-                        <option value="15">Difícil</option>
-                    </select>
-                    <button id="playAsWhite" class="control-btn">Jogar como Brancas</button>
-                    <button id="playAsBlack" class="control-btn">Jogar como Pretas</button>
-                </div>
-                <button id="helpBtn" class="help-btn" title="Mostrar melhor jogada">
-                    <i class="fas fa-lightbulb"></i> Dica
-                </button>
-            </div>
-            
-            <div id="board" style="width: 600px"></div>
+  <!-- Layout do Tabuleiro e Histórico -->
+  <div class="game-layout">
+    <!-- A classe "card" envolve o #chess-game -->
+    <div id="chess-game" class="card" style="display: none;">
+      <h2>Jogar contra o Bot</h2>
 
-            <div class="game-controls-bottom">
-                <button id="resignBtn" class="resign-btn" style="display: none;">Desistir</button>
-                <button id="newGameBtn" class="control-btn" style="display: none;">Novo Jogo</button>
-            </div>
-            
-            <div class="game-info">
-                <div id="status" class="status"></div>
-                <div id="api-info" class="api-info">
-                    <div id="sent-fen">FEN enviado: </div>
-                    <div id="api-response">Resposta da API: </div>
-                </div>
-            </div>
+      <div class="game-controls">
+        <div class="start-controls">
+          <select id="difficulty">
+            <option value="5">Fácil</option>
+            <option value="10" selected>Médio</option>
+            <option value="15">Difícil</option>
+          </select>
+          <button id="playAsWhite" class="control-btn">Brancas</button>
+          <button id="playAsBlack" class="control-btn">Pretas</button>
         </div>
 
-        <div class="moves-history card">
-            <h3>Histórico de Jogadas</h3>
-            <div id="moves-list"></div>
+        <button id="helpBtn" class="help-btn" title="Mostrar melhor jogada">
+          <i class="fas fa-lightbulb"></i> Dica
+        </button>
+        <button id="toggleApiInfoBtn" class="control-btn">API Info</button>
+      </div>
+
+      <div id="board" style="width: 600px;"></div>
+
+      <div class="game-controls-bottom">
+        <button id="resignBtn" class="resign-btn" style="display: none;">Desistir</button>
+        <button id="newGameBtn" class="control-btn" style="display: none; margin-top: 30px;">
+          Novo Jogo
+        </button>
+      </div>
+
+      <div class="game-info">
+        <div id="status" class="status"></div>
+        <div id="api-info" class="api-info" style="display: none;">
+          <div id="sent-fen">FEN enviado: </div>
+          <div id="api-response">Resposta da API: </div>
         </div>
+      </div>
     </div>
 
-    <script src="script.js"></script>
+    <!-- Histórico de Jogadas -->
+    <div class="moves-history card" style="display: none;">
+      <h3>Histórico de Jogadas</h3>
+      <div id="moves-list"></div>
+    </div>
+  </div>
+
+  <!-- Modal final indicando quem venceu e permitindo replay -->
+  <div id="winnerModal" class="winner-modal" style="display: none;">
+    <div class="modal-content">
+      <h2 id="winnerMessage"></h2>
+      <div class="modal-buttons">
+        <button id="closeWinnerModal" class="control-btn">Fechar</button>
+        <button id="replayGameBtn" class="control-btn">Rever Partida</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts externos -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script
+    src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.js"
+  ></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/stockfish.js/10.0.2/stockfish.js"></script>
+
+  <!-- Script principal -->
+  <script src="script.js"></script>
 </body>
 </html>

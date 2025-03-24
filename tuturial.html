@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>A Dream in 64 Squares</title>
+  <style>
+    /* Reset margins and padding */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* Subtle gradient background */
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #f4f4f4, #e0e0e0);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+      color: #333;
+    }
+
+    /* "Go Back" Button */
+    .btn-voltar {
+      margin-bottom: 20px;
+      padding: 12px 24px;
+      background-color: #444;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.2s;
+      font-size: 16px;
+    }
+    .btn-voltar:hover {
+      background-color: #333;
+      transform: translateY(-2px);
+    }
+
+    /* Main container */
+    .container {
+      background-color: #fff;
+      width: 100%;
+      max-width: 900px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      padding: 30px;
+      animation: fadeIn 0.5s ease;
+    }
+
+    /* Smooth entry animation */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Main title */
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    /* Subheadings */
+    h2 {
+      color: #444;
+      margin: 20px 0 10px;
+    }
+    h3 {
+      color: #555;
+      margin: 15px 0 5px;
+    }
+
+    p {
+      line-height: 1.6;
+      margin-bottom: 15px;
+    }
+
+    /* Highlight block */
+    .destaque {
+      background-color: #f9f9f9;
+      border-left: 5px solid #4CAF50;
+      padding: 10px;
+      margin: 10px 0;
+    }
+
+    /* Centered images */
+    .img-center {
+      display: block;
+      margin: 15px auto;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      border-radius: 8px;
+      max-width: 100%;
+    }
+
+    /* Grid for chess pieces */
+    .pieces-grid {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 30px;
+      margin-top: 20px;
+    }
+
+    .piece-card {
+      width: 120px;
+      text-align: center;
+    }
+
+    .piece-card img {
+      width: 80px;
+      height: 80px;
+      margin-bottom: 10px;
+      transition: transform 0.3s;
+    }
+
+    .piece-card img:hover {
+      transform: scale(1.1);
+    }
+
+    /* Spaced sections */
+    .section {
+      margin-top: 30px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Button to go back to index.html -->
+  <button class="btn-voltar" onclick="location.href='index.html';">Go Back to Index</button>
+
+  <!-- Main container -->
+  <div class="container">
+    <h1>A Dream in 64 Squares</h1>
+    <p>
+      Chess is an ancient art where kings and queens, rooks and bishops, 
+      knights and pawns, all dance upon a board of infinite fascination. 
+      In this short journey, you will discover the pieces and their initial setup, 
+      so that you may take your first steps toward epic matches.
+    </p>
+
+    <!-- Section 1: Starting Position -->
+    <div class="section">
+      <h2>1. The Starting Position</h2>
+      <p>
+        This is how the battle looks at the moment it begins:
+        each army stands ready, awaiting the dawn of the first move.
+      </p>
+      <!-- Board with starting position -->
+      <img 
+        class="img-center" 
+        src="data:image/png;base64,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" 
+        alt="Chessboard with pieces in the starting position">
+    </div>
+
+    <!-- Section 2: Chess Pieces -->
+    <div class="section">
+      <h2>2. The Pieces and Their Traits</h2>
+      <p>
+        Each piece carries its own poetry: the pawn, humble; the rook, 
+        mighty; the knight, daring; the bishop, insightful; the queen, majestic; 
+        and the king, cornerstone of the entire tale.
+      </p>
+      <div class="pieces-grid">
+        <div class="piece-card">
+          <img 
+            src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSbjjrPsmpEGhRY__Y6qHk5ceAixKofs7yC7w&s" 
+            alt="White Pawn">
+          <p><strong>Pawn</strong></p>
+        </div>
+        <div class="piece-card">
+          <img 
+            src="https://www.educolorir.com/paginas-para-colorir-torre-xadrez-p25866.jpg" 
+            alt="White Rook">
+          <p><strong>Rook</strong></p>
+        </div>
+        <div class="piece-card">
+          <img 
+            src="data:image/png;base64,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" 
+            alt="White Knight">
+          <p><strong>Knight</strong></p>
+        </div>
+        <div class="piece-card">
+          <img 
+            src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRMEiczVBIxSEDM4zEEhSpZe5drj1l8XBLLqA&s" 
+            alt="White Bishop">
+          <p><strong>Bishop</strong></p>
+        </div>
+        <div class="piece-card">
+          <img 
+            src="https://static.wikia.nocookie.net/chess/images/4/42/LightQueen.png/revision/latest/scale-to-width/360?cb=20230320152643" 
+            alt="White Queen">
+          <p><strong>Queen</strong></p>
+        </div>
+        <div class="piece-card">
+          <img 
+            src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_qYAmb1gJ65HQqoECsur0MFdn_kv3GF8wESI_zM_adc-QgznZ7apb4yYth9xMoIze324&usqp=CAU" 
+            alt="White King">
+          <p><strong>King</strong></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 3: Basic Rules -->
+    <div class="section">
+      <h2>3. Fundamental Rules</h2>
+      <p>
+        The flow of chess follows its own paths. A few guiding principles:
+      </p>
+      <ul>
+        <li><strong>Movement:</strong> Each piece has its own style. Pawns move forward, 
+            rooks slide along ranks and files, knights leap in “L” shapes, bishops 
+            cut diagonals, the queen combines all these powers, and the king 
+            advances only one square.</li>
+        <li><strong>Check & Checkmate:</strong> A check means your king is under attack; 
+            a checkmate ends the game, for there is no way out.</li>
+        <li><strong>Castling:</strong> A special move that protects the king and activates the rook.</li>
+        <li><strong>Pawn Promotion:</strong> Upon reaching the farthest rank, a pawn 
+            may become a queen, rook, bishop, or knight.</li>
+      </ul>
+    </div>
+
+    <!-- Section 4: Strategy & Basic Tactics -->
+    <div class="section">
+      <h2>4. Strategy & Basic Tactics</h2>
+      <div class="destaque">
+        • <strong>Control the Center:</strong> Central squares (e4, d4, e5, d5) are keys 
+        to space and mobility.<br>
+        • <strong>Develop Pieces Early:</strong> Bring knights and bishops out quickly, 
+        and protect your king by castling.<br>
+        • <strong>Tactics like Forks, Discoveries, and Pins:</strong> Use these tactical 
+        maneuvers to gain an advantage.
+      </div>
+      <p>
+        Through trial and error, every move reveals new nuances in this stage 
+        of drama and beauty. Study, experiment, and above all, enjoy yourself!
+      </p>
+    </div>
+
+    <!-- Section 5: Conclusion -->
+    <div class="section">
+      <h2>5. Conclusion</h2>
+      <p>
+        Chess is an eternal story: each game is a chapter, each move a poetic 
+        phrase. Let the art of the board envelop you, teaching you creative 
+        thinking and respect for the subtle power of each move.
+      </p>
+      <p>
+        May your journey be prosperous. Enjoy the game!
+      </p>
+    </div>
+
+  </div> <!-- End of .container -->
+</body>
+</html>
